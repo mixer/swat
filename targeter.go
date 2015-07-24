@@ -6,18 +6,18 @@ import (
 )
 
 // Targeter is embedded and used to set the output for actions.
-type Targeter struct {
+type targeter struct {
 	writer io.Writer
 	closer io.Closer
 }
 
 // Writes the output of the action to the writer.
-func (t *Targeter) ToWriter(w io.Writer) {
+func (t *targeter) ToWriter(w io.Writer) {
 	t.writer = w
 }
 
 // Writes the output of the action to the file specified by the path.
-func (t *Targeter) ToFile(file string) error {
+func (t *targeter) ToFile(file string) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (t *Targeter) ToFile(file string) error {
 	return nil
 }
 
-func (t *Targeter) end() {
+func (t *targeter) end() {
 	if t.closer != nil {
 		t.closer.Close()
 	}

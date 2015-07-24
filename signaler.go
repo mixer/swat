@@ -7,18 +7,18 @@ import (
 
 // Signaller is an embedded struct used to trigger actions when
 // a syscall is sent. It should not be used directly.
-type Signaler struct {
+type signaler struct {
 	fn      func()
 	signals []os.Signal
 	closer  chan bool
 }
 
 // Used to run an action when an OS signal is received.
-func (s *Signaler) OnSignal(signals ...os.Signal) {
+func (s *signaler) OnSignal(signals ...os.Signal) {
 	s.signals = signals
 }
 
-func (s *Signaler) end() {
+func (s *signaler) end() {
 	select {
 	case <-s.closer:
 	case s.closer <- true:
@@ -26,7 +26,7 @@ func (s *Signaler) end() {
 	}
 }
 
-func (s *Signaler) start() {
+func (s *signaler) start() {
 	defer func() {
 		s.closer <- true
 	}()

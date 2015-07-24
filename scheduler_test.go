@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func newTestScheduler() (*Scheduler, *[]time.Time) {
+func newTestScheduler() (*scheduler, *[]time.Time) {
 	times := []time.Time{}
 	s := newScheduler(func() {
 		times = append(times, time.Now())

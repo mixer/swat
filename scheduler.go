@@ -20,7 +20,7 @@ import (
 //  - Omitting `every` runs something just once.
 //  - `for` specifies how long "every" runs
 //  - `until` specifies a time for "every" to stop running at
-type Scheduler struct {
+type scheduler struct {
 	fn     func()
 	at     time.Time
 	after  time.Duration
@@ -30,44 +30,44 @@ type Scheduler struct {
 	closer chan bool
 }
 
-func newScheduler(fn func()) *Scheduler {
-	return &Scheduler{fn: fn, closer: make(chan bool, 1)}
+func newScheduler(fn func()) *scheduler {
+	return &scheduler{fn: fn, closer: make(chan bool, 1)}
 }
 
 // `after` starts something at the given duration after the current time.
-func (s *Scheduler) After(after time.Duration) *Scheduler {
+func (s *scheduler) After(after time.Duration) *scheduler {
 	s.after = after
 	return s
 }
 
 // `every` runs something at an interval after its start time.
 // Omitting it runs something just once.
-func (s *Scheduler) Every(every time.Duration) *Scheduler {
+func (s *scheduler) Every(every time.Duration) *scheduler {
 	s.every = every
 	return s
 }
 
 // `at` start something at a given time
-func (s *Scheduler) At(at time.Time) *Scheduler {
+func (s *scheduler) At(at time.Time) *scheduler {
 	s.at = at
 	return s
 }
 
 // `for` specifies how long "every" runs. Omitting it runs it
 // for infinite time.
-func (s *Scheduler) For(length time.Duration) *Scheduler {
+func (s *scheduler) For(length time.Duration) *scheduler {
 	s.length = length
 	return s
 }
 
 // `for` specifies how long "every" runs. Omitting it runs it
 // for infinite time.
-func (s *Scheduler) Until(until time.Time) *Scheduler {
+func (s *scheduler) Until(until time.Time) *scheduler {
 	s.until = until
 	return s
 }
 
-func (s *Scheduler) validate() error {
+func (s *scheduler) validate() error {
 	if !s.at.IsZero() && s.after > 0 {
 		return errors.New("Swat Error: Using both 'At' and 'After' will lead to unexepected results.")
 	}
@@ -83,7 +83,7 @@ func (s *Scheduler) validate() error {
 	return nil
 }
 
-func (s *Scheduler) end() {
+func (s *scheduler) end() {
 	select {
 	case <-s.closer:
 	case s.closer <- true:
@@ -92,7 +92,7 @@ func (s *Scheduler) end() {
 }
 
 // gets the initial sleep time before starting calling the function.
-func (s *Scheduler) resolveSleep() time.Duration {
+func (s *scheduler) resolveSleep() time.Duration {
 	if s.after > 0 {
 		return s.after
 	} else if !s.at.IsZero() {
@@ -104,14 +104,14 @@ func (s *Scheduler) resolveSleep() time.Duration {
 
 // Returns whether there's enough data to qualify the scheduler
 // as being activated.
-func (s *Scheduler) isActivated() bool {
+func (s *scheduler) isActivated() bool {
 	return s.after > 0 ||
 		!s.at.IsZero() ||
 		s.every > 0
 }
 
 // Returns the time that the scheduler should run until.
-func (s *Scheduler) getUntil() time.Time {
+func (s *scheduler) getUntil() time.Time {
 	if s.length > 0 {
 		return time.Now().Add(s.length)
 	} else if !s.until.IsZero() {
@@ -123,7 +123,7 @@ func (s *Scheduler) getUntil() time.Time {
 	return time.Unix(1<<62, 0)
 }
 
-func (s *Scheduler) start() {
+func (s *scheduler) start() {
 	defer func() {
 		s.closer <- true
 	}()
